@@ -1,0 +1,10 @@
+resolver: lts-14.13
+
+packages:
+  - .
+  - ../box
+  - ../chessIO
+
+extra-deps:
+  - readme-lhs-0.2.1
+  - o-clock-1.1.0
