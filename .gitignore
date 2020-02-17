@@ -1,3 +1,5 @@
 /.stack-work/
 /dist-newstyle/
 TAGS
+/.DS_Store
+/app/.DS_Store

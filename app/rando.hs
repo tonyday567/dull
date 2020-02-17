@@ -1,20 +1,23 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
-
+ 
 import Protolude hiding (race, race_, runConcurrently, putStrLn)
 import Box
-import Game.Chess.UCI
+import Game.Chess.UCI hiding (outputStrLn)
+import Game.Chess
 import qualified Streaming.Prelude as S
 import Control.Concurrent.Classy.Async
 import System.IO
 import System.Process
 import GHC.Base (String)
+import qualified Data.HashMap.Strict as HashMap
+import Data.IORef
+import Control.Concurrent.STM.TChan
 
 startE :: FilePath -> [GHC.Base.String] -> IO (Handle, Handle, ProcessHandle)
 startE cmd args = do
@@ -37,6 +40,16 @@ mkStockfishBox e =
 -- Just "Stockfish 10 64 BMI2 by T. Romstad, M. Costalba, J. Kiiski, G. Linscott"
 -- with (liftC <$> stockc) (\c -> void $ commit c "uci")
 
+start'' :: (String -> IO ()) -> String -> [String] -> IO Engine
+start'' outputStrLn cmd args = do
+  (Just inH, Just outH, Nothing, procH) <- createProcess (proc cmd args) {
+      std_in = CreatePipe, std_out = CreatePipe
+    }
+  hSetBuffering inH LineBuffering
+  Engine inH outH procH outputStrLn Nothing Nothing Nothing HashMap.empty <$>
+       newEmptyMVar <*> newIORef False <*>
+       newBroadcastTChanIO <*> newBroadcastTChanIO <*>
+       newIORef (startpos, [])
 
 main :: IO ()
 main = do
@@ -50,7 +63,7 @@ main = do
   let fileOut = commitLines "dull.log"
   putStrLn ":adding wires"
   Protolude.print =<< race
-    (etc () echoq (wireIn) >> putStrLn ":wireIn terminated")
+    (etc () echoq wireIn >> putStrLn ":wireIn terminated")
     (etc () echoq (wireOut <> (Box <$> fileOut <*> mempty)) >> putStrLn ":wireOut terminated")
   putStrLn ":wires terminated"
   terminateCarefully p

@@ -21,8 +21,6 @@ executable dull
   main-is: rando.hs
   hs-source-dirs: app
   default-extensions:
-    NegativeLiterals
-    NoImplicitPrelude
     OverloadedStrings
     UnicodeSyntax
   ghc-options:
@@ -39,4 +37,6 @@ executable dull
     , streaming
     , concurrency
     , process
+    , unordered-containers
+    , stm
   default-language: Haskell2010
