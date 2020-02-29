@@ -35,3 +35,6 @@ file:///Users/tonyday/Downloads/pgn-extract/help.html#flag-summary | pgn-extract
 
 pgn-extract -vgrob.vars -d dups.pgn -o t3.pgn t2.pgn
 
+https://github.com/ShailChoksi/lichess-bot
+
+https://sourceforge.net/projects/scidvspc/files/
